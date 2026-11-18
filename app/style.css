@@ -22,3 +22,7 @@ footer { color: #777; font-size: 13px; }
 .row.new { animation: flash 2s ease-out; }
 @keyframes flash { from { background: #fff4c2; } to { background: #fff; } }
 footer code { font-size: 12px; }
+.new-slot { height: 40px; max-width: 960px; display: flex; align-items: center; }
+.new-bar { width: 100%; height: 32px; font: inherit; font-weight: 600; color: #0b4f9c; background: #e8f1fd; border: 1px solid #a9c8f0; border-radius: 6px; cursor: pointer; }
+.new-bar.sev1 { color: #fff; background: #b00020; border-color: #b00020; }
+.new-bar[hidden] { display: block; visibility: hidden; }

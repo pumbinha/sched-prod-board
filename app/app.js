@@ -6,6 +6,7 @@ const loader = board.querySelector('[data-testid="loader"]');
 const empty = board.querySelector('[data-testid="empty"]');
 const list = board.querySelector('[data-testid="incident-list"]');
 const status = document.getElementById('status');
+const newBar = board.querySelector('[data-testid="new-bar"]');
 
 // Acked ids survive refreshes (and reloads): the row keeps its mark.
 const ACK_KEY = 'sched-board-acked';
@@ -87,11 +88,32 @@ list.addEventListener('click', async (e) => {
   }
 });
 
+// Product's decision (after SCHED-4511): the list holds still while it is on screen. New incidents wait
+// behind the "N new" bar and come in on click, so a row never moves under the pointer.
 let loaded = false;
+let latest = [];
+function showBar(incidents) {
+  const onScreen = new Set([...list.children].map((li) => li.dataset.id));
+  const waiting = incidents.filter((i) => !onScreen.has(i.id));
+  if (!waiting.length) {
+    newBar.hidden = true;
+    return;
+  }
+  const sev1 = waiting.filter((i) => i.severity === 'sev1').length;
+  newBar.textContent = `${waiting.length} new incident${waiting.length > 1 ? 's' : ''}${sev1 ? ` · ${sev1} sev1` : ''} — show`;
+  newBar.classList.toggle('sev1', sev1 > 0);
+  newBar.hidden = false;
+}
+newBar.addEventListener('click', () => {
+  render(latest);
+  newBar.hidden = true;
+});
 async function tick() {
   try {
     const page = await fetchIncidents();
-    render(page.incidents);
+    latest = page.incidents;
+    if (!loaded || list.children.length === 0) render(latest);
+    else showBar(latest);
     loaded = true;
     status.textContent = `· updated ${new Date(page.updatedAt).toLocaleTimeString(viewerLocale())}`;
     status.classList.remove('stale');
